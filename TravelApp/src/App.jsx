@@ -29,7 +29,7 @@ function App() {
      <Logo />
      <Form  onAddingItems={setPackingListItems} />
      <Packinglist onHandleChecked={handleCheckedItem} onHandleDelete={handleDeletedItem}  items={packingListItems} />
-     <Stats />
+     <Stats items={packingListItems} />
     </div>
     
   )
@@ -114,11 +114,25 @@ function Packinglist({items, onHandleChecked, onHandleDelete}){
 }
 
 
-function Stats(){
+function Stats({items}){
+
+  if (items.length == 0)
+  {
+    return(
+      <div className='stats'>
+      <p>Add Items in the list to keep track off for your next travel ✈</p>
+      </div>
+
+    )
+  }
+
+  const totalCount = items.length;
+  const totalPacked = items.slice().filter((item) => item.packed == true).length;
+  let totalPercentage = Math.round(totalPacked / totalCount * 100);
 
   return (
     <div className='stats'>
-      <p>You have X items on your list, and you already packed X (X%)</p>
+      <p>You have {totalCount} items on your list, and you already packed {totalPacked} ({totalPercentage}%)</p>
     </div>
   )
   
