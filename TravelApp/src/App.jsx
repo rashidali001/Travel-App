@@ -1,25 +1,34 @@
 import { useState } from 'react'
 
-
-
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-];
-
-
-
 function App() {
 
   const [packingListItems, setPackingListItems] = useState([])
+
+
+  function handleCheckedItem(id){
+
+    setPackingListItems((packingListItems) => packingListItems.map(
+      (item) => item.id === id?{...item, packed : !item.packed}: item
+    ))
+
+  }
+
+  function handleDeletedItem(id){
+
+    setPackingListItems((packingListItems)=> packingListItems.filter(
+      (item) => item.id !== id
+    ))
+  }
+
+
   
 
   return (
 
     <div className='app'>
      <Logo />
-     <Form items={packingListItems} onAddingItems={setPackingListItems} />
-     <Packinglist  items={packingListItems} />
+     <Form  onAddingItems={setPackingListItems} />
+     <Packinglist onHandleChecked={handleCheckedItem} onHandleDelete={handleDeletedItem}  items={packingListItems} />
      <Stats />
     </div>
     
@@ -33,10 +42,12 @@ function Logo(){
 }
 
 
-function Form({items, onAddingItems}){
+function Form({onAddingItems}){
 
-  const item = {quantity:1}
+  const item = {quantity:1, packed:false}
   const [placeHolder, setPlaceHolder] = useState("Item...")
+  const [seletedQuantity, setSelectedQuantity] = useState(1)
+
   function handleForm(e){
     e.preventDefault();
     if (item.description == null){
@@ -44,33 +55,35 @@ function Form({items, onAddingItems}){
       return;
     }
     item.id = Date.now();
-    item.packed = false;
+    item.quantity = seletedQuantity;
     onAddingItems(items=> [...items, item]);
-    
-    
+    setSelectedQuantity(1); 
+    const inputDescription = document.getElementById("input");
+    inputDescription.value = "";
+    console.log(item);
   }
 
   function handleSelect(e){
-    item.quantity = e.target.value
+    setSelectedQuantity(parseInt(e.target.value));    
+    item.quantity = seletedQuantity;
   }
 
   function handleInput(e){
-
     item.description = e.target.value;
-
+    
   }
 
 
   return(
     <form className='add-form' onSubmit={handleForm}>
       <h3>What do you need for your trip?</h3>
-      <select onChange={handleSelect}>
+      <select value={seletedQuantity} onChange={handleSelect}>
         {Array.from({length:20},(_,i)=> i + 1).map(num=>(
           <option value={num} key={num}>{num}</option>
         ))
         }
       </select>
-      <input onChange={handleInput} type="text" placeholder={placeHolder} />
+      <input id='input' onChange={handleInput} type="text" placeholder={placeHolder} />
       <button>ADD</button>    
     </form>
   )
@@ -78,16 +91,19 @@ function Form({items, onAddingItems}){
 }
 
 
-function Packinglist({items}){
+function Packinglist({items, onHandleChecked, onHandleDelete}){
 
   return(
     <div className='list'>
       <ul>
         {items.map((item)=>(
           <li key={item.id}>
+            <input type="checkbox" value={item.packed} onChange={()=>onHandleChecked(item.id)} />
+            <span style={item.packed?{textDecoration:"line-through"}:{}}>
             <span style={{margin:"0 1px"}}>{item.quantity}</span>
             <span>{item.description}</span>
-            <span style={{cursor:"pointer"}}>❌</span>
+            </span>
+            <span style={{cursor:"pointer"}} onClick={()=> onHandleDelete(item.id)}>❌</span>
           </li>
         ))}
       </ul>
